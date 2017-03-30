@@ -2,25 +2,11 @@
 
 namespace StoragelessSession;
 
-const UINT16_LE_PACK_CODE       =   "v";
-const UINT16_SIZE               =   2;
 const UINT32_LE_PACK_CODE       =   "V";
 const UINT32_SIZE               =   4;
 const RFC2965_COOKIE_SIZE       =   4096;
 const MIN_OVERHEAD_PER_COOKIE   =   3;
-const METADATA_SIZE             =   UINT32_SIZE + UINT16_SIZE;
-
-function addBlockPadding($str, $bsize) {
-    $len = strlen($str);
-    $remainder = $len % $bsize;
-    $targetlen = (int)(($len + $bsize - 1) / $bsize) * $bsize;
-    $padded = str_pad($str, $targetlen, "\0", STR_PAD_RIGHT);
-    return array($padded, $bsize - $remainder);
-}
-
-function removeBlockPadding($str, $padding_bytes) {
-    return substr($str, 0, -$padding_bytes);
-}
+const METADATA_SIZE             =   UINT32_SIZE;
 
 class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     private $secret;
@@ -35,7 +21,7 @@ class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $secret,
         $expire         = 2592000,
         $digest_algo    = "sha256",
-        $cipher_algo    = "aes-256-cbc",
+        $cipher_algo    = "aes-256-ctr",
         $cipher_keylen  = 32
     ) {
         $this->secret           = $secret;
@@ -79,8 +65,7 @@ class CryptoCookieSessionHandler implements \SessionHandlerInterface {
             return "";
         }
 
-        extract(unpack(UINT32_LE_PACK_CODE . 'valid_till/' . UINT16_LE_PACK_CODE . 'pad_leftover',
-            substr($message, 0, METADATA_SIZE)));
+        $valid_till = unpack(UINT32_LE_PACK_CODE, substr($message, 0, METADATA_SIZE))[1];
 
         if (time() > $valid_till) {
             return "";
@@ -90,26 +75,24 @@ class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $ciphertext = substr($message, METADATA_SIZE + $this->cipher_ivlen);
 
         $key = hash_pbkdf2($this->digest_algo, $this->secret, $iv, 1, $this->cipher_keylen, true);
-        $data = openssl_decrypt($ciphertext, $this->cipher_algo, $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
+        $data = openssl_decrypt($ciphertext, $this->cipher_algo, $key, OPENSSL_RAW_DATA, $iv);
         if ($data === false) {
             throw new OpenSSLError();
         }
 
-        return removeBlockPadding($data, $pad_leftover);
+        return $data;
     }
 
     public function write($id, $data) {
         $iv = openssl_random_pseudo_bytes($this->cipher_ivlen);
         $key = hash_pbkdf2($this->digest_algo, $this->secret, $iv, 1, $this->cipher_keylen, true);
 
-        list($padded_data, $leftover) = addBlockPadding($data, $this->cipher_ivlen);
-
-        $ciphertext = openssl_encrypt($padded_data, $this->cipher_algo, $key, OPENSSL_RAW_DATA | OPENSSL_ZERO_PADDING, $iv);
+        $ciphertext = openssl_encrypt($data, $this->cipher_algo, $key, OPENSSL_RAW_DATA, $iv);
         if ($ciphertext === false) {
             throw new OpenSSLError();
         }
 
-        $meta = pack(UINT32_LE_PACK_CODE . UINT16_LE_PACK_CODE, time() + $this->expire, $leftover);
+        $meta = pack(UINT32_LE_PACK_CODE, time() + $this->expire);
         $message = $meta . $iv . $ciphertext;
 
         $digest = hash_hmac($this->digest_algo, $message, $this->secret, true);
