@@ -1,5 +1,5 @@
 {
-    "name": "Snawoot/Snawoot/php-storageless-sessions",
+    "name": "Snawoot/php-storageless-sessions",
     "type": "library",
     "description": "Storageless sessions with encrypted and HMAC-signed cookies",
     "keywords": ["sessions", "cookies", "HMAC", "encrypted cookies", "signed cookies"],
