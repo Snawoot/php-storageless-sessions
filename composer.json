@@ -1,0 +1,24 @@
+{
+    "name": "Snawoot/Snawoot/php-storageless-sessions",
+    "type": "library",
+    "description": "Storageless sessions with encrypted and HMAC-signed cookies",
+    "keywords": ["sessions", "cookies", "HMAC", "encrypted cookies", "signed cookies"],
+    "homepage": "https://github.com/Snawoot/php-storageless-sessions",
+    "license": "MIT",
+    "authors": [
+    	{
+    		"name": "Vladislav Yarmak",
+    		"email": "vladislav@vm-0.com",
+    		"role": "Author"
+    	}
+    ],
+    "require": {
+        "php": ">=5.6.0",
+        "ext-hash": "*",
+        "ext-openssl": "*"
+    },
+    "version": "1.0.0",
+    "autoload": {
+        "psr-4": {"StoragelessSession\\": "src/StoragelessSession"}
+    }
+}
