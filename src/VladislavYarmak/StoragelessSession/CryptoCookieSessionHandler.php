@@ -8,7 +8,7 @@ const RFC2965_COOKIE_SIZE       =   4096;
 const MIN_OVERHEAD_PER_COOKIE   =   3;
 const METADATA_SIZE             =   UINT32_SIZE;
 
-class CryptoCookieSessionHandler implements \SessionHandlerInterface {
+final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     private $secret;
     private $digest_algo;
     private $digest_len;
