@@ -24,12 +24,25 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $cipher_algo    = "aes-256-ctr",
         $cipher_keylen  = 32
     ) {
+
         if (empty($secret)) {
             throw new BadSecretException();
         }
         $this->secret           = $secret;
+
+        if (!in_array($digest_algo, hash_algos())) {
+            throw new BadAlgoException();
+        }
         $this->digest_algo      = $digest_algo;
+
+        if (!in_array($cipher_algo, openssl_get_cipher_methods(true))) {
+            throw new BadAlgoException();
+        }
         $this->cipher_algo      = $cipher_algo;
+
+        if ( !( is_int($cipher_keylen) && is_int($expire) && $expire > 0 && $cipher_keylen > 0)) {
+            throw new BadNumericParamsException();
+        }
         $this->cipher_keylen    = $cipher_keylen;
         $this->expire           = $expire;
     }
@@ -134,6 +147,9 @@ class BadSecretException extends \Exception {
 
 }
 class BadAlgoException extends \Exception {
+
+}
+class BadNumericParamsException extends \Exception {
 
 }
 class CookieTooBigException extends \Exception {
