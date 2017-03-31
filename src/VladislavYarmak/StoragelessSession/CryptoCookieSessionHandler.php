@@ -24,6 +24,9 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $cipher_algo    = "aes-256-ctr",
         $cipher_keylen  = 32
     ) {
+        if (empty($secret)) {
+            throw new BadSecretException();
+        }
         $this->secret           = $secret;
         $this->digest_algo      = $digest_algo;
         $this->cipher_algo      = $cipher_algo;
