@@ -27,7 +27,7 @@ framework:
 
 services:
     session.handler.cookie:
-        class:     SessionHandler\Cookie
+        class:     VladislavYarmak\StoragelessSession\CryptoCookieSessionHandler
         public:    true
         arguments:    ['reallylongsecretplease']
 ```
