@@ -16,6 +16,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     private $cipher_ivlen;
     private $session_name_len;
     private $session_cookie_params;
+    private $overwritten = array();
 
     public function __construct(
         $secret,
@@ -63,6 +64,8 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     }
 
     public function read($id) {
+        if (isset($this->overwritten[$id])) return $this->overwritten[$id];
+
         if (!isset($_COOKIE[$id])) {
             return "";
         }
@@ -121,6 +124,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         )
             throw new CookieTooBigException();
 
+        $this->overwritten[$id] = $data;
         return setcookie($id,
             $output,
             ($this->session_cookie_params["lifetime"] > 0) ? time() + $this->session_cookie_params["lifetime"] : 0,
@@ -135,6 +139,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     public function destroy($id) {
         setcookie( $id, '', time() - 1000 );
         setcookie( $id, '', time() - 1000, '/' );
+        unset($this->overwritten[$id]);
         return true;
     }
 
