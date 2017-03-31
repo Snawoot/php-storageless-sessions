@@ -1,6 +1,6 @@
 <?php
 
-namespace StoragelessSession;
+namespace VladislavYarmak\StoragelessSession;
 
 const UINT32_LE_PACK_CODE       =   "V";
 const UINT32_SIZE               =   4;

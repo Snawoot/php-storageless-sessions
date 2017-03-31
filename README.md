@@ -12,7 +12,7 @@ Sessions handler which stores session data in HMAC-signed and encrypted cookies.
 <?php
 
 $secret = "reallylongsecretplease";
-$handler = new StoragelessSession\CryptoCookieSessionHandler($secret);
+$handler = new VladislavYarmak\StoragelessSession\CryptoCookieSessionHandler($secret);
 
 session_set_save_handler($handler, true);
 session_start();
