@@ -8,6 +8,14 @@ const RFC2965_COOKIE_SIZE       =   4096;
 const MIN_OVERHEAD_PER_COOKIE   =   3;
 const METADATA_SIZE             =   UINT32_SIZE;
 
+if(!function_exists('hash_equals')) {
+    function hash_equals($a, $b) {
+        $ret = strlen($a) ^ strlen($b);
+        $ret |= array_sum(unpack("C*", $a^$b));
+        return !$ret;
+    }
+}
+
 final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     private $secret;
     private $digest_algo;
