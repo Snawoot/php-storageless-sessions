@@ -13,7 +13,7 @@
     	}
     ],
     "require": {
-        "php": ">=5.6.0",
+        "php": ">=5.4.0",
         "ext-hash": "*",
         "ext-openssl": "*"
     },
@@ -21,6 +21,6 @@
         "psr-4": {"VladislavYarmak\\": "src/VladislavYarmak"}
     },
     "require-dev": {
-        "phpunit/phpunit": "^5.0"
+        "phpunit/phpunit": "^5.0||^4.8"
     }
 }
