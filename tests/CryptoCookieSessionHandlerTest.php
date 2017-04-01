@@ -10,7 +10,7 @@ final class CryptoCookieSessionHandlerTest extends \PHPUnit_Framework_TestCase
     public function testCanBeCreated()
     {
         $this->assertInstanceOf(
-            CryptoCookieSessionHandler::class,
+            "VladislavYarmak\\StoragelessSession\\CryptoCookieSessionHandler",
             new CryptoCookieSessionHandler('somesecret')
         );
     }
