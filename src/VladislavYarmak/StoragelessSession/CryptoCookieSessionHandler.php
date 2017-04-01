@@ -68,7 +68,10 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     public function read($id) {
         if (!$this->opened) $this->open("", "");
 
-        if (isset($this->overwritten[$id])) return $this->overwritten[$id];
+        if (isset($this->overwritten[$id])) {
+            list($ovr_data, $ovr_expires) = $this->overwritten[$id];
+            return (time() < $ovr_expires) ? $ovr_data : "";
+        }
 
         if (!isset($_COOKIE[$id])) {
             return "";
@@ -117,7 +120,8 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
             throw new OpenSSLError();
         }
 
-        $meta = pack(UINT32_LE_PACK_CODE, time() + $this->expire);
+        $expires = time() + $this->expire;
+        $meta = pack(UINT32_LE_PACK_CODE, $expires);
         $message = $meta . $iv . $ciphertext;
 
         $digest = hash_hmac($this->digest_algo, $message, $this->secret, true);
@@ -130,7 +134,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         )
             throw new CookieTooBigException();
 
-        $this->overwritten[$id] = $data;
+        $this->overwritten[$id] = array($data, $expires);
         return setcookie($id,
             $output,
             ($this->session_cookie_params["lifetime"] > 0) ? time() + $this->session_cookie_params["lifetime"] : 0,
