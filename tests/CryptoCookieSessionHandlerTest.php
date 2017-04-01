@@ -168,7 +168,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         $handler = new CryptoCookieSessionHandler($secret);
         $handler->open("/tmp", $sess_id);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
         $handler->close();
 
         $GLOBALS["_COOKIE"] = array();
@@ -195,7 +195,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         $handler = new CryptoCookieSessionHandler($secret);
         $handler->open("/tmp", $sess_id);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
         $this->assertEquals($handler->read($sess_id), $data);
         $handler->close();
 
@@ -213,7 +213,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         $handler = new CryptoCookieSessionHandler($secret);
         $handler->open("/tmp", $sess_id);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
         $handler->close();
 
         $GLOBALS["_COOKIE"] = array();
@@ -237,7 +237,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         $handler = new CryptoCookieSessionHandler($secret);
         $handler->open("/tmp", $sess_id);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
 
         $this->assertTrue($handler->destroy($sess_id));
         foreach ($GLOBALS["_SETCOOKIE"] as $ck) {
@@ -258,7 +258,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
         $data = openssl_random_pseudo_bytes(300);
 
         $handler = new CryptoCookieSessionHandler($secret);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
         $handler->close();
 
         $GLOBALS["_COOKIE"] = array();
@@ -284,7 +284,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         $handler = new CryptoCookieSessionHandler($secret, 5);
         $handler->open("/tmp", $sess_id);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
         $handler->close();
 
         $GLOBALS["_COOKIE"] = array();
@@ -315,7 +315,7 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         $handler = new CryptoCookieSessionHandler($secret, 5);
         $handler->open("/tmp", $sess_id);
-        $handler->write($sess_id, $data);
+        $this->assertTrue($handler->write($sess_id, $data));
 
         $this->assertEquals($handler->read($sess_id), $data);
 
