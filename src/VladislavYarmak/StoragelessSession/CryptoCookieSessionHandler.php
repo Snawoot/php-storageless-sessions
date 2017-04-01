@@ -101,7 +101,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $iv = substr($message, METADATA_SIZE, $this->cipher_ivlen);
         $ciphertext = substr($message, METADATA_SIZE + $this->cipher_ivlen);
 
-        $key = hash_pbkdf2($this->digest_algo, $this->secret, $id + $valid_till_bin, 1, $this->cipher_keylen, true);
+        $key = hash_pbkdf2($this->digest_algo, $this->secret, $id . $valid_till_bin, 1, $this->cipher_keylen, true);
         $data = openssl_decrypt($ciphertext, $this->cipher_algo, $key, OPENSSL_RAW_DATA, $iv);
         if ($data === false) {
             throw new OpenSSLError();
@@ -117,7 +117,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $valid_till_bin = pack(UINT32_LE_PACK_CODE, $expires);
 
         $iv = openssl_random_pseudo_bytes($this->cipher_ivlen);
-        $key = hash_pbkdf2($this->digest_algo, $this->secret, $id + $valid_till_bin, 1, $this->cipher_keylen, true);
+        $key = hash_pbkdf2($this->digest_algo, $this->secret, $id . $valid_till_bin, 1, $this->cipher_keylen, true);
 
         $ciphertext = openssl_encrypt($data, $this->cipher_algo, $key, OPENSSL_RAW_DATA, $iv);
         if ($ciphertext === false) {
