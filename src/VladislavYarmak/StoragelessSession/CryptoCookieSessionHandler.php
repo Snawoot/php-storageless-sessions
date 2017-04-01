@@ -86,12 +86,13 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $message = substr($input, $this->digest_len);
 
         if (!hash_equals(
-            hash_hmac($this->digest_algo, $message, $this->secret, true),
+            hash_hmac($this->digest_algo, $id . $message, $this->secret, true),
             $digest)) {
             return "";
         }
 
-        $valid_till = unpack(UINT32_LE_PACK_CODE, substr($message, 0, METADATA_SIZE))[1];
+        $valid_till_bin = substr($message, 0, METADATA_SIZE);
+        $valid_till = unpack(UINT32_LE_PACK_CODE, $valid_till_bin)[1];
 
         if (time() > $valid_till) {
             return "";
@@ -100,7 +101,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $iv = substr($message, METADATA_SIZE, $this->cipher_ivlen);
         $ciphertext = substr($message, METADATA_SIZE + $this->cipher_ivlen);
 
-        $key = hash_pbkdf2($this->digest_algo, $this->secret, $iv, 1, $this->cipher_keylen, true);
+        $key = hash_pbkdf2($this->digest_algo, $this->secret, $id + $valid_till_bin, 1, $this->cipher_keylen, true);
         $data = openssl_decrypt($ciphertext, $this->cipher_algo, $key, OPENSSL_RAW_DATA, $iv);
         if ($data === false) {
             throw new OpenSSLError();
@@ -112,19 +113,21 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     public function write($id, $data) {
         if (!$this->opened) $this->open("", "");
 
+        $expires = time() + $this->expire;
+        $valid_till_bin = pack(UINT32_LE_PACK_CODE, $expires);
+
         $iv = openssl_random_pseudo_bytes($this->cipher_ivlen);
-        $key = hash_pbkdf2($this->digest_algo, $this->secret, $iv, 1, $this->cipher_keylen, true);
+        $key = hash_pbkdf2($this->digest_algo, $this->secret, $id + $valid_till_bin, 1, $this->cipher_keylen, true);
 
         $ciphertext = openssl_encrypt($data, $this->cipher_algo, $key, OPENSSL_RAW_DATA, $iv);
         if ($ciphertext === false) {
             throw new OpenSSLError();
         }
 
-        $expires = time() + $this->expire;
-        $meta = pack(UINT32_LE_PACK_CODE, $expires);
+        $meta = $valid_till_bin;
         $message = $meta . $iv . $ciphertext;
 
-        $digest = hash_hmac($this->digest_algo, $message, $this->secret, true);
+        $digest = hash_hmac($this->digest_algo, $id . $message, $this->secret, true);
         $output = rtrim(base64_encode($digest . $message), '=');
         
         if ( (strlen($output) +
