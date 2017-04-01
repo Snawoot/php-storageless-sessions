@@ -1,12 +1,11 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
 use VladislavYarmak\StoragelessSession\CryptoCookieSessionHandler;
 
 /**
  * @covers CryptoCookieSessionHandler
  */
-final class CryptoCookieSessionHandlerTest extends TestCase
+final class CryptoCookieSessionHandlerTest extends \PHPUnit_Framework_TestCase
 {
     public function testCanBeCreated()
     {

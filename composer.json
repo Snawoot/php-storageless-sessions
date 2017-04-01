@@ -21,6 +21,6 @@
         "psr-4": {"VladislavYarmak\\": "src/VladislavYarmak"}
     },
     "require-dev": {
-        "phpunit/phpunit": "^6.0"
+        "phpunit/phpunit": "^5.0"
     }
 }
