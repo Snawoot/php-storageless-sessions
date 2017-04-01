@@ -83,7 +83,10 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         }
 
         $digest = substr($input, 0, $this->digest_len);
+        if ($digest === false) return "";
+
         $message = substr($input, $this->digest_len);
+        if ($message === false) return "";
 
         if (!hash_equals(
             hash_hmac($this->digest_algo, $id . $message, $this->secret, true),
