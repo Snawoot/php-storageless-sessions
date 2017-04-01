@@ -353,4 +353,33 @@ final class CryptoCookieSessionHandlerTest extends \PHPUnit_Framework_TestCase
         unset($GLOBALS["_COOKIE"]);
         unset($GLOBALS["_SETCOOKIE"]);
     }
+
+    /**
+     * @depends testOpenWorks
+     * @dataProvider cookieProvider
+     */
+    public function testInteroperability($secret, $cookies, $expected)
+    {
+        $GLOBALS["_COOKIE"] = $cookies;
+        $sess_id = $cookies["PHPSESSID"];
+
+        $handler = new CryptoCookieSessionHandler($secret);
+        $handler->open("/tmp", $sess_id);
+        $this->assertEquals($handler->read($sess_id), $expected);
+        $handler->close();
+    }
+
+    public function cookieProvider()
+    {
+        return [
+            [
+                "somesecret",
+                [
+                    "PHPSESSID" => "sh8teeplnis2017ncuv2ur1le4",
+                    "sh8teeplnis2017ncuv2ur1le4" => 'X6eKM1bWNywsbOwvIWdPk4a+a/bRcyFXzZi/26I854CsafR9PrLZDDNcY+q+dMpfGFBzFy7DFc5fcMMx07ajNXIqMkxgu/TC'
+                ],
+                'a|s:1:"1";b|s:1:"2";'
+            ]
+        ];
+    }
 }
