@@ -1,8 +1,8 @@
-# php-storageless-sessions
+# php-storageless-sessions [![Build Status](https://travis-ci.org/Snawoot/php-storageless-sessions.svg?branch=master)](https://travis-ci.org/Snawoot/php-storageless-sessions)
 Sessions handler which stores session data in HMAC-signed and encrypted cookies.
 
 ## Requirements
-* PHP 5.6.0 or newer
+* PHP 5.4.0 or newer
 * OpenSSL extension (built-in by default)
 * Hash extension (built-in by default)
 
