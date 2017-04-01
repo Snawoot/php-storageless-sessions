@@ -326,4 +326,32 @@ final class CryptoCookieSessionHandlerTest extends TestCase
 
         unset($GLOBALS["_SETCOOKIE"]);
     }
+
+    /**
+     * @depends testOpenWorks
+     */
+    public function testDigestBoundToSessionId()
+    {
+        $sess_id = "session";
+        $sess_id2 = "another_session";
+        $secret = "somesecret";
+        $data = openssl_random_pseudo_bytes(300);
+
+        $handler = new CryptoCookieSessionHandler($secret);
+        $handler->open("/tmp", $sess_id);
+        $handler->write($sess_id, $data);
+        $handler->close();
+
+        $GLOBALS["_COOKIE"] = array();
+        foreach ($GLOBALS["_SETCOOKIE"] as $key => $value)
+            $GLOBALS["_COOKIE"][$sess_id2] = $GLOBALS["_SETCOOKIE"][$sess_id]["value"];
+
+        $handler = new CryptoCookieSessionHandler($secret);
+        $handler->open("/tmp", $sess_id);
+        $this->assertEquals($handler->read($sess_id2), "");
+        $handler->close();
+
+        unset($GLOBALS["_COOKIE"]);
+        unset($GLOBALS["_SETCOOKIE"]);
+    }
 }
