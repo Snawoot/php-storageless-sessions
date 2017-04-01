@@ -17,6 +17,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     private $session_name_len;
     private $session_cookie_params;
     private $overwritten = array();
+    private $opened = false;
 
     public function __construct(
         $secret,
@@ -56,6 +57,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $this->session_name_len = strlen(session_name());
         $this->session_cookie_params = session_get_cookie_params();
 
+        $this->opened = true;
         return true;
     }
 
@@ -64,6 +66,8 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     }
 
     public function read($id) {
+        if (!$this->opened) $this->open("", "");
+
         if (isset($this->overwritten[$id])) return $this->overwritten[$id];
 
         if (!isset($_COOKIE[$id])) {
@@ -103,6 +107,8 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     }
 
     public function write($id, $data) {
+        if (!$this->opened) $this->open("", "");
+
         $iv = openssl_random_pseudo_bytes($this->cipher_ivlen);
         $key = hash_pbkdf2($this->digest_algo, $this->secret, $iv, 1, $this->cipher_keylen, true);
 
