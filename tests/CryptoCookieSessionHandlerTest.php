@@ -376,10 +376,71 @@ final class CryptoCookieSessionHandlerTest extends \PHPUnit_Framework_TestCase
                 "somesecret",
                 [
                     "PHPSESSID" => "sh8teeplnis2017ncuv2ur1le4",
-                    "sh8teeplnis2017ncuv2ur1le4" => 'X6eKM1bWNywsbOwvIWdPk4a+a/bRcyFXzZi/26I854CsafR9PrLZDDNcY+q+dMpfGFBzFy7DFc5fcMMx07ajNXIqMkxgu/TC'
+                    "sh8teeplnis2017ncuv2ur1le4" => 'X6eKM1bWNywsbOwvIWdPk4a-a_bRcyFXzZi_26I854CsafR9PrLZDDNcY-q-dMpfGFBzFy7DFc5fcMMx07ajNXIqMkxgu_TC'
                 ],
                 'a|s:1:"1";b|s:1:"2";'
             ]
         ];
+    }
+
+    /**
+     * @depends testOpenWorks
+     * @expectedException VladislavYarmak\StoragelessSession\CookieTooBigException
+     */
+    public function testLengthException()
+    {
+        $secret = "somesecret";
+        $sess_id = "session";
+        $maxlength = 4096;
+        $data = openssl_random_pseudo_bytes($maxlength);
+
+        $handler = new CryptoCookieSessionHandler($secret);
+        $handler->open("/tmp", $sess_id);
+        $this->assertEquals($handler->write($sess_id, $data), $expected);
+        $handler->close();
+    }
+
+	/**
+	 * Call protected/private method of a class.
+	 *
+	 * @param object &$object    Instantiated object that we will run method on.
+	 * @param string $methodName Method name to call
+	 * @param array  $parameters Array of parameters to pass into method.
+	 *
+	 * @return mixed Method return.
+	 */
+	public function invokeMethod(&$object, $methodName, array $parameters = array())
+	{
+	    $reflection = new \ReflectionClass(get_class($object));
+	    $method = $reflection->getMethod($methodName);
+	    $method->setAccessible(true);
+	
+	    return $method->invokeArgs($object, $parameters);
+	}
+
+    /**
+     * @depends testCanBeCreated
+     */
+    public function testBase64UrlsafeEncoding()
+    {
+        $maxlength = 100;
+        $data = openssl_random_pseudo_bytes($maxlength);
+
+        $handler = new CryptoCookieSessionHandler("somesecret");
+
+        for ($i=0; $i <= $maxlength; $i++) {
+            unset($GLOBALS['_BASE64_DECODE_CALLS']);
+
+			$data = substr($data, 0, $i);
+            $encoded = $this->invokeMethod($handler, "base64_urlsafe_encode", array($data));
+            $decoded = $this->invokeMethod($handler, "base64_urlsafe_decode", array($encoded));
+
+            $this->assertEquals($decoded, $data);
+
+            list($sent_to_base64_dec) = $GLOBALS['_BASE64_DECODE_CALLS'];
+            $this->assertEquals($sent_to_base64_dec, \base64_encode($data));
+        }
+
+        unset($GLOBALS['_BASE64_DECODE_CALLS']);
     }
 }

@@ -85,7 +85,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
             return "";
         }
 
-        $input = base64_decode($_COOKIE[$id]);
+        $input = $this->base64_urlsafe_decode($_COOKIE[$id]);
         if ($input === false) {
             return "";
         }
@@ -139,7 +139,7 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
         $message = $meta . $iv . $ciphertext;
 
         $digest = hash_hmac($this->digest_algo, $id . $message, $this->secret, true);
-        $output = rtrim(base64_encode($digest . $message), '=');
+        $output = $this->base64_urlsafe_encode($digest . $message);
         
         if ( (strlen($output) +
             $this->session_name_len +
@@ -222,6 +222,16 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
             return substr($output, 0, $key_length);
         else
             return bin2hex(substr($output, 0, $key_length));
+    }
+
+    private function base64_urlsafe_encode($input) {
+        return strtr(base64_encode($input), array("+" => "-", "/" => "_", "=" => ""));
+    }
+
+    private function base64_urlsafe_decode($input) {
+        $translated = strtr($input, array("-" => "+", "_" => "/"));
+        $padded = str_pad($translated, ( (int)((strlen($input) + 3) / 4) ) * 4, "=", STR_PAD_RIGHT);
+        return base64_decode($padded);
     }
 }
 
