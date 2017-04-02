@@ -5,6 +5,7 @@ Sessions handler which stores session data in HMAC-signed and encrypted cookies.
 * PHP 5.4.0 or newer
 * OpenSSL extension (built-in by default)
 * Hash extension (built-in by default)
+* Enabled output buffering (`output_buffering=1` or `output_buffering=On` in php.ini)
 
 ## Usage
 ### Plain PHP
