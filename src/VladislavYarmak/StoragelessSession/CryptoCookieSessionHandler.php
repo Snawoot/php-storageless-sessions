@@ -58,6 +58,8 @@ final class CryptoCookieSessionHandler implements \SessionHandlerInterface {
     }
 
     public function open($savePath, $sessionName) {
+        if (ob_get_level() === 0) ob_start();
+
         $this->digest_len = strlen(hash($this->digest_algo, "", true));
         $this->cipher_ivlen = openssl_cipher_iv_length($this->cipher_algo);
         if ($this->digest_len === false or $this->cipher_ivlen === false) throw new BadAlgoException();
